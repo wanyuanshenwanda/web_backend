@@ -1,32 +1,61 @@
 package com.xzf.backend.exception;
 
 
-import com.xzf.backend.cconst.EHttpCode;
-import com.xzf.backend.response.MyResponse;
+import com.xzf.backend.cconst.enums.ResponseCodeEnum;
+import lombok.Data;
 
+
+@Data
 public class BusinessException extends RuntimeException {
-	private MyResponse <Object> response;
+	private ResponseCodeEnum codeEnum;
 
+	private Integer code;
 
-	public BusinessException(EHttpCode httpCode) {
-		super(httpCode.getInfo());
-		this.response = new MyResponse<>();
-		response.setStatus(httpCode.getStatus());
-		response.setCode(httpCode.getCode());
-		response.setInfo(httpCode.getInfo());
-		response.setData(null);
+	private String message;
+
+	public BusinessException(String message, Throwable e) {
+		super(message, e);
+		this.message = message;
 	}
 
-	public BusinessException(String info) {
-		super(info);
-		this.response = new MyResponse<>();
-		response.setStatus(EHttpCode.CODE_600.getStatus());
-		response.setCode(EHttpCode.CODE_600.getCode());
-		response.setInfo(info);
-		response.setData(null);
+	public BusinessException(String message) {
+		super(message);
+		this.message = message;
 	}
 
-	public MyResponse<Object> getResponse() {
-		return response;
+	public BusinessException(Throwable e) {
+		super(e);
 	}
+
+	public BusinessException(ResponseCodeEnum codeEnum) {
+		super(codeEnum.getMsg());
+		this.codeEnum = codeEnum;
+		this.code = codeEnum.getCode();
+		this.message = codeEnum.getMsg();
+	}
+
+	public BusinessException(Integer code, String message) {
+		super(message);
+		this.code = code;
+		this.message = message;
+	}
+
+	public ResponseCodeEnum getCodeEnum() {
+		return codeEnum;
+	}
+
+	public Integer getCode() {
+		return code;
+	}
+
+	@Override
+	public String getMessage() {
+		return message;
+	}
+
+	@Override
+	public Throwable fillInStackTrace() {
+		return this;
+	}
+
 }

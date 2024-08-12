@@ -7,17 +7,29 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.PARAMETER, ElementType.FIELD})
 public @interface VerifyParam {
-	boolean required() default false;
+	/**
+	 * 校验正则
+	 *
+	 * @return
+	 */
+	VerifyRegexEnum regex() default VerifyRegexEnum.NO;
 
-	int max() default -1;
-
+	/**
+	 * 最小长度
+	 *
+	 * @return
+	 */
 	int min() default -1;
 
 	/**
-	 * 正则
+	 * 最大长度
+	 *
+	 * @return
 	 */
-	VerifyRegexEnum regex() default VerifyRegexEnum.NO;
+	int max() default -1;
+
+	boolean required() default false;
 }

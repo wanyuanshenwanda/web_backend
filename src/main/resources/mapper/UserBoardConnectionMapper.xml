@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xzf.backend.mappers.UserBoardConnectionMapper">
+
+    <resultMap id="base_result_map" type="com.xzf.backend.entity.po.UserBoardConnection">
+        <id column="user_id" property="userId"/>
+        <result column="board_id" property="boardId"/>
+        <result column="user_inner_integral" property="userInnerIntegral"/>
+    </resultMap>
+
+    <sql id="base_column_list">
+        user_id, board_id, user_inner_integral
+    </sql>
+
+    <select id="selectList" resultMap="base_result_map">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM user_board_record
+    </select>
+
+    <insert id="insert" parameterType="com.xzf.backend.entity.po.UserBoardConnection">
+        INSERT INTO user_board_record(user_id, board_id, user_inner_integral)
+        VALUES (#{userId}, #{boardId}, #{userInnerIntegral})
+    </insert>
+
+    <update id="updateByUserIdAndBoardId" parameterType="com.xzf.backend.entity.po.UserBoardConnection">
+        UPDATE user_board_record
+        SET user_inner_integral = #{userInnerIntegral}
+        WHERE user_id = #{userId} AND board_id = #{boardId}
+    </update>
+
+    <delete id="deleteByUserIdAndBoardId">
+        DELETE FROM user_board_record
+        WHERE user_id = #{userId} AND board_id = #{boardId}
+    </delete>
+
+    <select id="selectByUserIdAndBoardId" resultMap="base_result_map">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM user_board_record WHERE user_id = #{userId} AND board_id = #{boardId}
+    </select>
+
+    <select id="selectByUserId" resultMap="base_result_map">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM user_board_record WHERE user_id = #{userId}
+    </select>
+
+    <update id="adddIntegral">
+        UPDATE user_board_record
+        SET user_inner_integral = user_inner_integral + #{addIntegral}
+        WHERE user_id = #{userId} AND board_id = #{boardId}
+    </update>
+
+    <insert id="addRecord">
+        INSERT INTO user_board_record(user_id, board_id, user_inner_integral)
+        VALUES (#{userId}, #{boardId}, #{integral})
+    </insert>
+
+    <select id="selectByUserIdAndBoard" resultMap="base_result_map">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM user_board_record WHERE user_id = #{userId} AND board_id = #{boardId}
+    </select>
+
+    <select id="getIntegralByUserIdAndBoardId" resultType="int">
+        SELECT user_inner_integral
+        FROM user_board_record
+        WHERE user_id = #{userId} AND board_id = #{boardId}
+    </select>
+
+    <select id="getAllbyUserId" resultType="com.xzf.backend.entity.po.BoardIntegralConnection">
+        SELECT board_id AS 'boardId', user_inner_integral AS 'integral'
+        FROM user_board_record
+        WHERE user_id = #{userId}
+    </select>
+</mapper>

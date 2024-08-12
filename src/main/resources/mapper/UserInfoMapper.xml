@@ -1,178 +1,509 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper
-        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.xzf.backend.mapper.UserInfoMapper">
+<mapper namespace="com.xzf.backend.mappers.UserInfoMapper">
 
-    <resultMap id="BaseResultMap" type="com.xzf.backend.entity.pojo.UserInfo">
-        <id property="userId" column="user_id" jdbcType="BIGINT"/>
-        <result property="nickName" column="nick_name" jdbcType="VARCHAR"/>
-        <result property="email" column="email" jdbcType="VARCHAR"/>
-        <result property="password" column="password" jdbcType="VARCHAR"/>
-        <result property="sex" column="sex" jdbcType="TINYINT"/>
-        <result property="personDescription" column="person_description" jdbcType="VARCHAR"/>
-        <result property="joinTime" column="join_time" jdbcType="TIMESTAMP"/>
-        <result property="lastLoginTime" column="last_login_time" jdbcType="TIMESTAMP"/>
-        <result property="lastLoginIp" column="last_login_ip" jdbcType="VARCHAR"/>
-        <result property="lastLoginIpAddress" column="last_login_ip_address" jdbcType="VARCHAR"/>
-        <result property="totalIntegral" column="total_integral" jdbcType="INTEGER"/>
-        <result property="currentIntegral" column="current_integral" jdbcType="INTEGER"/>
-        <result property="status" column="status" jdbcType="TINYINT"/>
+    <resultMap id="base_result_map" type="com.xzf.backend.entity.po.UserInfo">
+        <result column="user_id" property="userId"/>
+        <result column="nick_name" property="nickName"/>
+        <result column="email" property="email"/>
+        <result column="password" property="password"/>
+        <result column="sex" property="sex"/>
+        <result column="person_description" property="personDescription"/>
+        <result column="join_time" property="joinTime"/>
+        <result column="last_login_time" property="lastLoginTime"/>
+        <result column="total_integral" property="totalIntegral"/>
+        <result column="current_integral" property="currentIntegral"/>
     </resultMap>
 
-    <sql id="Base_Column_List">
-        user_id,nick_name,email,
-        password,sex,person_description,
-        join_time,last_login_time,last_login_ip,
-        last_login_ip_address,total_integral,current_integral,
-        status
+
+    <!-- 通用查询结果列-->
+    <sql id="base_column_list">
+        user_id
+        ,nick_name,email,password,sex,
+		 person_description,join_time,last_login_time,
+		 total_integral,current_integral
     </sql>
-    <update id="updateIntegral">
-        update user_info
-        set current_integral =current_integral + #{integral}
-        <if test="integral &gt; 0">
-            ,total_integral = total_integral+#{integral}
+
+    <sql id="base_condition_filed">
+        <if test="query.userId != null and query.userId!=''">
+            and user_id = #{query.userId}
         </if>
-        where user_id = #{userId}
-        <![CDATA[and current_integral +#{integral}>=0]]>
-    </update>
+        <if test="query.nickName != null and query.nickName!=''">
+            and nick_name = #{query.nickName}
+        </if>
+        <if test="query.email != null and query.email!=''">
+            and email = #{query.email}
+        </if>
+        <if test="query.password != null and query.password!=''">
+            and password = #{query.password}
+        </if>
+        <if test="query.sex != null">
+            and sex = #{query.sex}
+        </if>
+        <if test="query.personDescription != null and query.personDescription!=''">
+            and person_description = #{query.personDescription}
+        </if>
+        <if test="query.joinTime != null and query.joinTime!=''">
+            <![CDATA[ and  join_time=str_to_date(#{query.joinTime}, '%Y-%m-%d') ]]>
+        </if>
+        <if test="query.lastLoginTime != null and query.lastLoginTime!=''">
+            <![CDATA[ and  last_login_time=str_to_date(#{query.lastLoginTime}, '%Y-%m-%d') ]]>
+        </if>
 
-    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List" />
-        from user_info
-        where user_id = #{userId,jdbcType=BIGINT}
-    </select>
-
-    <select id="loadUserList" parameterType="com.easybbs.vo.UserQueryVo" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List" />
-        from user_info
+        <if test="query.totalIntegral != null">
+            and total_integral = #{query.totalIntegral}
+        </if>
+        <if test="query.currentIntegral != null">
+            and current_integral = #{query.currentIntegral}
+        </if>
+    </sql>
+    <!-- 通用条件列-->
+    <sql id="base_condition">
         <where>
-            <if test="nickNameFuzzy != null and nickNameFuzzy != ''">
-                and nick_name like concat('%',#{nikeNameFuzzy},'%')
+            <include refid="base_condition_filed"/>
+        </where>
+    </sql>
+
+    <!-- 通用查询条件列-->
+    <sql id="query_condition">
+        <where>
+            <include refid="base_condition_filed"/>
+            <if test="query.userIdFuzzy!= null  and query.userIdFuzzy!=''">
+                and user_id like concat('%', #{query.userIdFuzzy}, '%')
             </if>
-            <if test="sex != null">
-                and sex = #{sex}
+            <if test="query.nickNameFuzzy!= null  and query.nickNameFuzzy!=''">
+                and nick_name like concat('%', #{query.nickNameFuzzy}, '%')
             </if>
-            <if test="status != null">
-                and status = #{status}
+            <if test="query.emailFuzzy!= null  and query.emailFuzzy!=''">
+                and email like concat('%', #{query.emailFuzzy}, '%')
+            </if>
+            <if test="query.passwordFuzzy!= null  and query.passwordFuzzy!=''">
+                and password like concat('%', #{query.passwordFuzzy}, '%')
+            </if>
+            <if test="query.personDescriptionFuzzy!= null  and query.personDescriptionFuzzy!=''">
+                and person_description like concat('%', #{query.personDescriptionFuzzy}, '%')
+            </if>
+            <if test="query.joinTimeStart!= null and query.joinTimeStart!=''">
+                <![CDATA[ and  join_time>=str_to_date(#{query.joinTimeStart}, '%Y-%m-%d') ]]>
+            </if>
+            <if test="query.joinTimeEnd!= null and query.joinTimeEnd!=''">
+                <![CDATA[ and  join_time< date_sub(str_to_date(#{query.joinTimeEnd},'%Y-%m-%d'),interval -1 day) ]]>
+            </if>
+            <if test="query.lastLoginTimeStart!= null and query.lastLoginTimeStart!=''">
+                <![CDATA[ and  last_login_time>=str_to_date(#{query.lastLoginTimeStart}, '%Y-%m-%d') ]]>
+            </if>
+            <if test="query.lastLoginTimeEnd!= null and query.lastLoginTimeEnd!=''">
+                <![CDATA[ and  last_login_time< date_sub(str_to_date(#{query.lastLoginTimeEnd},'%Y-%m-%d'),interval -1 day) ]]>
             </if>
         </where>
+    </sql>
+
+    <select id="selectList" resultMap="base_result_map">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM user_info
+        <include refid="query_condition"/>
+        <if test="query.orderBy!=null">
+            order by ${query.orderBy}
+        </if>
+        <if test="query.simplePage!=null">
+            limit #{query.simplePage.start},#{query.simplePage.end}
+        </if>
     </select>
 
-    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
-        delete from user_info
-        where  user_id = #{userId,jdbcType=BIGINT}
-    </delete>
-    <insert id="insert" keyColumn="user_id" keyProperty="userId" parameterType="com.easybbs.entity.UserInfo" useGeneratedKeys="true">
-        insert into user_info
-        ( user_id,nick_name,email
-        ,password,sex,person_description
-        ,join_time,last_login_time,last_login_ip
-        ,last_login_ip_address,total_integral,current_integral
-        ,status)
-        values (#{userId,jdbcType=BIGINT},#{nickName,jdbcType=VARCHAR},#{email,jdbcType=VARCHAR}
-               ,#{password,jdbcType=VARCHAR},#{sex,jdbcType=TINYINT},#{personDescription,jdbcType=VARCHAR}
-               ,#{joinTime,jdbcType=TIMESTAMP},#{lastLoginTime,jdbcType=TIMESTAMP},#{lastLoginIp,jdbcType=VARCHAR}
-               ,#{lastLoginIpAddress,jdbcType=VARCHAR},#{totalIntegral,jdbcType=INTEGER},#{currentIntegral,jdbcType=INTEGER}
-               ,#{status,jdbcType=TINYINT})
-    </insert>
-    <insert id="insertSelective" keyColumn="user_id" keyProperty="userId" parameterType="com.easybbs.entity.UserInfo" useGeneratedKeys="true">
-        insert into user_info
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT count(1) FROM user_info
+        <include refid="query_condition"/>
+    </select>
+
+    <insert id="insert" parameterType="com.xzf.backend.entity.po.UserInfo">
+        INSERT INTO user_info
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="userId != null">user_id,</if>
-            <if test="nickName != null">nick_name,</if>
-            <if test="email != null">email,</if>
-            <if test="password != null">password,</if>
-            <if test="sex != null">sex,</if>
-            <if test="personDescription != null">person_description,</if>
-            <if test="joinTime != null">join_time,</if>
-            <if test="lastLoginTime != null">last_login_time,</if>
-            <if test="lastLoginIp != null">last_login_ip,</if>
-            <if test="lastLoginIpAddress != null">last_login_ip_address,</if>
-            <if test="totalIntegral != null">total_integral,</if>
-            <if test="currentIntegral != null">current_integral,</if>
-            <if test="status != null">status,</if>
+            <if test="bean.userId != null">
+                user_id,
+            </if>
+            <if test="bean.nickName != null">
+                nick_name,
+            </if>
+            <if test="bean.email != null">
+                email,
+            </if>
+            <if test="bean.password != null">
+                password,
+            </if>
+            <if test="bean.sex != null">
+                sex,
+            </if>
+            <if test="bean.personDescription != null">
+                person_description,
+            </if>
+            <if test="bean.joinTime != null">
+                join_time,
+            </if>
+            <if test="bean.lastLoginTime != null">
+                last_login_time,
+            </if>
+
+            <if test="bean.totalIntegral != null">
+                total_integral,
+            </if>
+            <if test="bean.currentIntegral != null">
+                current_integral,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="userId != null">#{userId,jdbcType=BIGINT},</if>
-            <if test="nickName != null">#{nickName,jdbcType=VARCHAR},</if>
-            <if test="email != null">#{email,jdbcType=VARCHAR},</if>
-            <if test="password != null">#{password,jdbcType=VARCHAR},</if>
-            <if test="sex != null">#{sex,jdbcType=TINYINT},</if>
-            <if test="personDescription != null">#{personDescription,jdbcType=VARCHAR},</if>
-            <if test="joinTime != null">#{joinTime,jdbcType=TIMESTAMP},</if>
-            <if test="lastLoginTime != null">#{lastLoginTime,jdbcType=TIMESTAMP},</if>
-            <if test="lastLoginIp != null">#{lastLoginIp,jdbcType=VARCHAR},</if>
-            <if test="lastLoginIpAddress != null">#{lastLoginIpAddress,jdbcType=VARCHAR},</if>
-            <if test="totalIntegral != null">#{totalIntegral,jdbcType=INTEGER},</if>
-            <if test="currentIntegral != null">#{currentIntegral,jdbcType=INTEGER},</if>
-            <if test="status != null">#{status,jdbcType=TINYINT},</if>
+            <if test="bean.userId!=null">
+                #{bean.userId},
+            </if>
+            <if test="bean.nickName!=null">
+                #{bean.nickName},
+            </if>
+            <if test="bean.email!=null">
+                #{bean.email},
+            </if>
+            <if test="bean.password!=null">
+                #{bean.password},
+            </if>
+            <if test="bean.sex!=null">
+                #{bean.sex},
+            </if>
+            <if test="bean.personDescription!=null">
+                #{bean.personDescription},
+            </if>
+            <if test="bean.joinTime!=null">
+                #{bean.joinTime},
+            </if>
+            <if test="bean.lastLoginTime!=null">
+                #{bean.lastLoginTime},
+            </if>
+
+            <if test="bean.totalIntegral!=null">
+                #{bean.totalIntegral},
+            </if>
+            <if test="bean.currentIntegral!=null">
+                #{bean.currentIntegral},
+            </if>
         </trim>
     </insert>
-    <update id="updateByPrimaryKeySelective" parameterType="com.easybbs.entity.UserInfo">
-        update user_info
+
+    <insert id="insertOrUpdate" parameterType="com.xzf.backend.entity.po.UserInfo">
+        INSERT INTO user_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="bean.userId != null">
+                user_id,
+            </if>
+            <if test="bean.nickName != null">
+                nick_name,
+            </if>
+            <if test="bean.email != null">
+                email,
+            </if>
+            <if test="bean.password != null">
+                password,
+            </if>
+            <if test="bean.sex != null">
+                sex,
+            </if>
+            <if test="bean.personDescription != null">
+                person_description,
+            </if>
+            <if test="bean.joinTime != null">
+                join_time,
+            </if>
+            <if test="bean.lastLoginTime != null">
+                last_login_time,
+            </if>
+
+            <if test="bean.totalIntegral != null">
+                total_integral,
+            </if>
+            <if test="bean.currentIntegral != null">
+                current_integral,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="bean.userId!=null">
+                #{bean.userId},
+            </if>
+            <if test="bean.nickName!=null">
+                #{bean.nickName},
+            </if>
+            <if test="bean.email!=null">
+                #{bean.email},
+            </if>
+            <if test="bean.password!=null">
+                #{bean.password},
+            </if>
+            <if test="bean.sex!=null">
+                #{bean.sex},
+            </if>
+            <if test="bean.personDescription!=null">
+                #{bean.personDescription},
+            </if>
+            <if test="bean.joinTime!=null">
+                #{bean.joinTime},
+            </if>
+            <if test="bean.lastLoginTime!=null">
+                #{bean.lastLoginTime},
+            </if>
+
+            <if test="bean.totalIntegral!=null">
+                #{bean.totalIntegral},
+            </if>
+            <if test="bean.currentIntegral!=null">
+                #{bean.currentIntegral},
+            </if>
+        </trim>
+        on DUPLICATE key update
+        <trim prefix="" suffix="" suffixOverrides=",">
+            <if test="bean.userId!=null">
+                user_id = VALUES(user_id),
+            </if>
+            <if test="bean.nickName!=null">
+                nick_name = VALUES(nick_name),
+            </if>
+            <if test="bean.email!=null">
+                email = VALUES(email),
+            </if>
+            <if test="bean.password!=null">
+                password = VALUES(password),
+            </if>
+            <if test="bean.sex!=null">
+                sex = VALUES(sex),
+            </if>
+            <if test="bean.personDescription!=null">
+                person_description = VALUES(person_description),
+            </if>
+            <if test="bean.joinTime!=null">
+                join_time = VALUES(join_time),
+            </if>
+            <if test="bean.lastLoginTime!=null">
+                last_login_time = VALUES(last_login_time),
+            </if>
+
+            <if test="bean.totalIntegral!=null">
+                total_integral = VALUES(total_integral),
+            </if>
+            <if test="bean.currentIntegral!=null">
+                current_integral = VALUES(current_integral),
+            </if>
+        </trim>
+    </insert>
+
+    <insert id="insertBatch" parameterType="com.xzf.backend.entity.po.UserInfo">
+        INSERT INTO user_info(
+        user_id,
+        nick_name,
+        email,
+        password,
+        sex,
+        person_description,
+        join_time,
+        last_login_time,
+        total_integral,
+        current_integral,
+        )values
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.userId},
+            #{item.nickName},
+            #{item.email},
+            #{item.password},
+            #{item.sex},
+            #{item.personDescription},
+            #{item.joinTime},
+            #{item.lastLoginTime},
+            #{item.totalIntegral},
+            #{item.currentIntegral},
+            )
+        </foreach>
+    </insert>
+
+    <insert id="insertOrUpdateBatch" parameterType="com.xzf.backend.entity.po.UserInfo">
+        INSERT INTO user_info(
+        user_id,
+        nick_name,
+        email,
+        password,
+        sex,
+        person_description,
+        join_time,
+        last_login_time,
+        total_integral,
+        current_integral,
+        )values
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.userId},
+            #{item.nickName},
+            #{item.email},
+            #{item.password},
+            #{item.sex},
+            #{item.personDescription},
+            #{item.joinTime},
+            #{item.lastLoginTime},
+            #{item.totalIntegral},
+            #{item.currentIntegral},
+            )
+        </foreach>
+        on DUPLICATE key update
+        user_id = VALUES(user_id),
+        nick_name = VALUES(nick_name),
+        email = VALUES(email),
+        password = VALUES(password),
+        sex = VALUES(sex),
+        person_description = VALUES(person_description),
+        join_time = VALUES(join_time),
+        last_login_time = VALUES(last_login_time),
+        total_integral = VALUES(total_integral),
+        current_integral = VALUES(current_integral),
+    </insert>
+
+    <update id="updateByUserId" parameterType="com.xzf.backend.entity.po.UserInfo">
+        UPDATE user_info
         <set>
-            <if test="nickName != null">
-                nick_name = #{nickName,jdbcType=VARCHAR},
+            <if test="bean.nickName != null">
+                nick_name = #{bean.nickName},
             </if>
-            <if test="email != null">
-                email = #{email,jdbcType=VARCHAR},
+            <if test="bean.email != null">
+                email = #{bean.email},
             </if>
-            <if test="password != null">
-                password = #{password,jdbcType=VARCHAR},
+            <if test="bean.password != null">
+                password = #{bean.password},
             </if>
-            <if test="sex != null">
-                sex = #{sex,jdbcType=TINYINT},
+            <if test="bean.sex != null">
+                sex = #{bean.sex},
             </if>
-            <if test="personDescription != null">
-                person_description = #{personDescription,jdbcType=VARCHAR},
+            <if test="bean.personDescription != null">
+                person_description = #{bean.personDescription},
             </if>
-            <if test="joinTime != null">
-                join_time = #{joinTime,jdbcType=TIMESTAMP},
+            <if test="bean.joinTime != null">
+                join_time = #{bean.joinTime},
             </if>
-            <if test="lastLoginTime != null">
-                last_login_time = #{lastLoginTime,jdbcType=TIMESTAMP},
+            <if test="bean.lastLoginTime != null">
+                last_login_time = #{bean.lastLoginTime},
             </if>
-            <if test="lastLoginIp != null">
-                last_login_ip = #{lastLoginIp,jdbcType=VARCHAR},
+            <if test="bean.totalIntegral != null">
+                total_integral = #{bean.totalIntegral},
             </if>
-            <if test="lastLoginIpAddress != null">
-                last_login_ip_address = #{lastLoginIpAddress,jdbcType=VARCHAR},
-            </if>
-            <if test="totalIntegral != null">
-                total_integral = #{totalIntegral,jdbcType=INTEGER},
-            </if>
-            <if test="currentIntegral != null">
-                current_integral = #{currentIntegral,jdbcType=INTEGER},
-            </if>
-            <if test="status != null">
-                status = #{status,jdbcType=TINYINT},
+            <if test="bean.currentIntegral != null">
+                current_integral = #{bean.currentIntegral},
             </if>
         </set>
-        where   user_id = #{userId,jdbcType=BIGINT}
+        where user_id=#{userId}
     </update>
-    <update id="updateByPrimaryKey" parameterType="com.easybbs.entity.UserInfo">
-        update user_info
-        set
-            nick_name =  #{nickName,jdbcType=VARCHAR},
-            email =  #{email,jdbcType=VARCHAR},
-            password =  #{password,jdbcType=VARCHAR},
-            sex =  #{sex,jdbcType=TINYINT},
-            person_description =  #{personDescription,jdbcType=VARCHAR},
-            join_time =  #{joinTime,jdbcType=TIMESTAMP},
-            last_login_time =  #{lastLoginTime,jdbcType=TIMESTAMP},
-            last_login_ip =  #{lastLoginIp,jdbcType=VARCHAR},
-            last_login_ip_address =  #{lastLoginIpAddress,jdbcType=VARCHAR},
-            total_integral =  #{totalIntegral,jdbcType=INTEGER},
-            current_integral =  #{currentIntegral,jdbcType=INTEGER},
-            status =  #{status,jdbcType=TINYINT}
-        where   user_id = #{userId,jdbcType=BIGINT}
+
+    <delete id="deleteByUserId">
+        delete
+        from user_info
+        where user_id = #{userId}
+    </delete>
+
+    <select id="selectByUserId" resultMap="base_result_map">
+        select
+        <include refid="base_column_list"/>
+        from user_info where user_id=#{userId}
+    </select>
+
+    <update id="updateByEmail" parameterType="com.xzf.backend.entity.po.UserInfo">
+        UPDATE user_info
+        <set>
+            <if test="bean.userId != null">
+                user_id = #{bean.userId},
+            </if>
+            <if test="bean.nickName != null">
+                nick_name = #{bean.nickName},
+            </if>
+            <if test="bean.password != null">
+                password = #{bean.password},
+            </if>
+            <if test="bean.sex != null">
+                sex = #{bean.sex},
+            </if>
+            <if test="bean.personDescription != null">
+                person_description = #{bean.personDescription},
+            </if>
+            <if test="bean.joinTime != null">
+                join_time = #{bean.joinTime},
+            </if>
+            <if test="bean.lastLoginTime != null">
+                last_login_time = #{bean.lastLoginTime},
+            </if>
+            <if test="bean.totalIntegral != null">
+                total_integral = #{bean.totalIntegral},
+            </if>
+            <if test="bean.currentIntegral != null">
+                current_integral = #{bean.currentIntegral},
+            </if>
+        </set>
+        where email=#{email}
     </update>
-    <update id="updateStatus" parameterType="com.easybbs.vo.UserUpdateVo">
+
+    <delete id="deleteByEmail">
+        delete
+        from user_info
+        where email = #{email}
+    </delete>
+
+    <select id="selectByEmail" resultMap="base_result_map">
+        select
+        <include refid="base_column_list"/>
+        from user_info where email=#{email}
+    </select>
+
+    <update id="updateByNickName" parameterType="com.xzf.backend.entity.po.UserInfo">
+        UPDATE user_info
+        <set>
+            <if test="bean.userId != null">
+                user_id = #{bean.userId},
+            </if>
+            <if test="bean.email != null">
+                email = #{bean.email},
+            </if>
+            <if test="bean.password != null">
+                password = #{bean.password},
+            </if>
+            <if test="bean.sex != null">
+                sex = #{bean.sex},
+            </if>
+            <if test="bean.personDescription != null">
+                person_description = #{bean.personDescription},
+            </if>
+            <if test="bean.joinTime != null">
+                join_time = #{bean.joinTime},
+            </if>
+            <if test="bean.lastLoginTime != null">
+                last_login_time = #{bean.lastLoginTime},
+            </if>
+            <if test="bean.totalIntegral != null">
+                total_integral = #{bean.totalIntegral},
+            </if>
+            <if test="bean.currentIntegral != null">
+                current_integral = #{bean.currentIntegral},
+            </if>
+        </set>
+        where nick_name=#{nickName}
+    </update>
+
+    <delete id="deleteByNickName">
+        delete
+        from user_info
+        where nick_name = #{nickName}
+    </delete>
+
+    <select id="selectByNickName" resultMap="base_result_map">
+        select
+        <include refid="base_column_list"/>
+        from user_info where nick_name=#{nickName}
+    </select>
+    <update id="updateIntegral">
         update user_info
-        set status =  #{status,jdbcType=TINYINT}
-        where user_id = #{userId,jdbcType=BIGINT}
+        set current_integral = current_integral + #{integral}
+        <if test="integral>0">
+            ,total_integral =total_integral+#{integral}
+        </if>
+        where user_id = #{userId}
+        <![CDATA[ and current_integral + #{integral} >= 0]]>
     </update>
 </mapper>

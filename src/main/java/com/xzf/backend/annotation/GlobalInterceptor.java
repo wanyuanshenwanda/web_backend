@@ -20,8 +20,5 @@ public @interface GlobalInterceptor {
 	 */
 	boolean checkParams() default false;
 
-	/**
-	 * 校验频次
-	 */
 
 }
